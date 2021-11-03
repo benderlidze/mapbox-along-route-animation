@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Animate a point along a line</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.5.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.5.1/mapbox-gl.js"></script>
+    <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic2Vyc2Vyc2VyIiwiYSI6ImNrZnBpaWF5azBpMWMyeHBmdzJpdno1NzgifQ.4vBDF2DNuk-beXljllf3Yg';
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: { lng: 5.279607729565072, lat: 52.18554783962881 },
+            zoom: 8
+        });
+
+        const radius = 20;
+
+        function pointOnCircle(angle) {
+            return {
+                'type': 'Point',
+                'coordinates': [Math.cos(angle) * radius, Math.sin(angle) * radius]
+            };
+        }
+
+
+
+        map.on('load', () => {
+
+            map.loadImage('truck.png', (error, image) => {
+                if (error) throw error;
+                // Add the image to the map style.
+                map.addImage('truck', image);
+            })
+
+
+            // Add a source and layer displaying a point which will be animated in a circle.
+            map.addSource('point', {
+                'type': 'geojson',
+                'data': pointOnCircle(0)
+            });
+
+            map.addLayer({
+                'id': 'point',
+                'source': 'point',
+                'type': 'circle',
+                'paint': {
+                    'circle-radius': 210,
+                    'circle-color': '#007cbf'
+                }
+            });
+
+            map.on("click", e => {
+                console.log('e', e);
+            })
+        });
+
+        function animateMarker(timestamp) {
+            // Update the data to a new position based on the animation timestamp. The
+            // divisor in the expression `timestamp / 1000` controls the animation speed.
+            map.getSource('point').setData(pointOnCircle(timestamp / 1000));
+            // Request the next frame of the animation.
+            requestAnimationFrame(animateMarker);
+        }
+
+        // Start the animation.
+
+
+        // an arbitrary start will always be the same
+        // only the end or destination will change
+        getRoute([4.369115786207061, 52.06160542770829], [6.132421450269675, 51.39303171426383]);
+        async function getRoute(start, end) {
+            // make directions request using cycling profile
+            const query = await fetch(
+                `https://api.mapbox.com/directions/v5/mapbox/cycling/${start[0]},${start[1]};${end[0]},${end[1]}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`,
+                { method: 'GET' }
+            );
+            const json = await query.json();
+            const data = json.routes[0];
+            const route = data.geometry.coordinates;
+            const geojson = {
+                'type': 'Feature',
+                'properties': {},
+                'geometry': {
+                    'type': 'LineString',
+                    'coordinates': route
+                }
+            };
+            // if the route already exists on the map, we'll reset it using setData
+            if (map.getSource('route')) {
+                map.getSource('route').setData(geojson);
+            }
+            // otherwise, we'll make a new request
+            else {
+                map.addLayer({
+                    'id': 'route',
+                    'type': 'line',
+                    'source': {
+                        'type': 'geojson',
+                        'data': geojson
+                    },
+                    'layout': {
+                        'line-join': 'round',
+                        'line-cap': 'round'
+                    },
+                    'paint': {
+                        'line-color': '#3887be',
+                        'line-width': 5,
+                        'line-opacity': 0.75
+                    }
+                });
+            }
+
+            // get the sidebar and add the instructions
+            const instructions = document.getElementById('instructions');
+            const steps = data.legs[0].steps;
+
+            /*
+            let tripInstructions = '';
+            for (const step of steps) {
+                tripInstructions += `<li>${step.maneuver.instruction}</li>`;
+            }
+            instructions.innerHTML = `<p><strong>Trip duration: ${Math.floor(
+                data.duration / 60
+            )} min 🚴 </strong></p><ol>${tripInstructions}</ol>`;
+            */
+
+            animateMarker(0);
+        }
+    </script>
+
+</body>
+
+</html>
