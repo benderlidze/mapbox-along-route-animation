@@ -57,15 +57,6 @@
         //const kilometerPerMinute = 1.2236;
         const kilometerPerMinute = 0.2236;
         var date1 = "Nov 4, 2021 20:37";
-        //const date2 = "Nov 5, 2021 17:00";
-        // const minutes = (new Date(date2).getTime()) - (new Date(date1).getTime())
-        // console.log('minutes', minutes);
-
-        // const diff = Math.abs(new Date(date2) - new Date(date1));
-        // const minutesForAllRoute = Math.floor((diff / 1000) / 60);
-        // const minutesFromStart = Math.floor(((Math.abs(new Date() - new Date(date1))) / 1000) / 60);
-        // const startPos = minutesFromStart * kilometerPerMinute
-
 
         function getParam(param) {
             return new URLSearchParams(window.location.search).get(param);
@@ -79,6 +70,8 @@
                 center: { lng: 5.279607729565072, lat: 52.18554783962881 },
                 zoom: 8
             });
+            // Add zoom and rotation controls to the map.
+            map.addControl(new mapboxgl.NavigationControl());
 
             let origin = [4.369115786207061, 52.06160542770829];
             let destination = [6.132421450269675, 51.39303171426383];
