@@ -75,22 +75,8 @@
                 destination = JSON.parse(getParam('dest'));
             }
 
-            // A simple line from origin to destination.
-            // const route = {
-            //     'type': 'FeatureCollection',
-            //     'features': [
-            //         {
-            //             'type': 'Feature',
-            //             'geometry': {
-            //                 'type': 'LineString',
-            //                 'coordinates': [origin, destination]
-            //             }
-            //         }
-            //     ]
-            // };
-
             const route = await getRoute(origin, destination);
-            console.log('123', 123);
+            
             // A single point that animates along the route.
             // Coordinates are initially set to origin.
             const point = {
@@ -137,8 +123,6 @@
                     map.addImage('truck', image);
                 })
 
-
-                // Add a source and layer displaying a point which will be animated in a circle.
                 map.addSource('route', {
                     'type': 'geojson',
                     'data': route
@@ -164,11 +148,6 @@
                     'source': 'point',
                     'type': 'symbol',
                     'layout': {
-                        // This icon is a part of the Mapbox Streets style.
-                        // To view all images available in a Mapbox style, open
-                        // the style in Mapbox Studio and click the "Images" tab.
-                        // To add a new image to the style at runtime see
-                        // https://docs.mapbox.com/mapbox-gl-js/example/add-image/
                         'icon-image': 'truck',
                         // 'icon-rotate': ['get', 'bearing'],
                         'icon-rotation-alignment': 'map',
