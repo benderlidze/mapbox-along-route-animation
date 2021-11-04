@@ -56,19 +56,16 @@
     <script>
         //const kilometerPerMinute = 1.2236;
         const kilometerPerMinute = 0.2236;
-        const date1 = "Nov 4, 2021 20:37";
-        const date2 = "Nov 5, 2021 17:00";
+        var date1 = "Nov 4, 2021 20:37";
+        //const date2 = "Nov 5, 2021 17:00";
         // const minutes = (new Date(date2).getTime()) - (new Date(date1).getTime())
         // console.log('minutes', minutes);
 
-        const diff = Math.abs(new Date(date2) - new Date(date1));
-        const minutesForAllRoute = Math.floor((diff / 1000) / 60);
-        const minutesFromStart = Math.floor(((Math.abs(new Date() - new Date(date1))) / 1000) / 60);
-        const startPos = minutesFromStart * kilometerPerMinute
+        // const diff = Math.abs(new Date(date2) - new Date(date1));
+        // const minutesForAllRoute = Math.floor((diff / 1000) / 60);
+        // const minutesFromStart = Math.floor(((Math.abs(new Date() - new Date(date1))) / 1000) / 60);
+        // const startPos = minutesFromStart * kilometerPerMinute
 
-        console.log('diff, minutes', diff, minutesForAllRoute);
-        console.log('passed', minutesFromStart);
-        console.log('startPos', startPos);
 
         function getParam(param) {
             return new URLSearchParams(window.location.search).get(param);
@@ -76,19 +73,26 @@
 
         (async () => {
             mapboxgl.accessToken = 'pk.eyJ1Ijoic2Vyc2Vyc2VyIiwiYSI6ImNrZnBpaWF5azBpMWMyeHBmdzJpdno1NzgifQ.4vBDF2DNuk-beXljllf3Yg';
-            const map = new mapboxgl.Map({
+            map = new mapboxgl.Map({
                 container: 'map',
                 style: 'mapbox://styles/mapbox/streets-v11',
                 center: { lng: 5.279607729565072, lat: 52.18554783962881 },
                 zoom: 8
             });
 
-            const origin = [4.369115786207061, 52.06160542770829];
+            let origin = [4.369115786207061, 52.06160542770829];
             let destination = [6.132421450269675, 51.39303171426383];
 
-            console.log('getParam(dest)', getParam('dest'));
             if (getParam('dest')) {
                 destination = JSON.parse(getParam('dest'));
+            }
+            if (getParam('origin')) {
+                origin = JSON.parse(getParam('origin'));
+                map.setCenter(origin)
+            }
+            if (getParam('startdate')) {
+                date1 = getParam('startdate');
+                console.log('date1', date1);
             }
 
             const route = await getRoute(origin, destination);
@@ -108,28 +112,6 @@
                     }
                 ]
             };
-
-            // Calculate the distance in kilometers between route start/end point.
-            const lineDistance = turf.length(route);
-            console.log('lineDistance', lineDistance + " kilometers");
-            const arc = [];
-
-            // Number of steps to use in the arc and animation, more steps means
-            // a smoother arc and animation, but too many steps will result in a
-            // low frame rate
-            const steps = 500;
-
-            // Draw an arc between the `origin` & `destination` of the two points
-            for (let i = 0; i < lineDistance; i += lineDistance / steps) {
-                const segment = turf.along(route, i);
-                arc.push(segment.geometry.coordinates);
-            }
-            //console.log('arc', arc);
-            // Update the route with calculated arc coordinates
-            route.geometry.coordinates = arc;
-
-            // Used to increment the value of the point measurement against the route.
-            let counter = 0;
 
             map.on('load', () => {
 
@@ -173,6 +155,7 @@
                     }
                 });
 
+                console.log('date1', date1);
                 function animate() {
 
                     const minutesFromStart = (((Math.abs(new Date() - new Date(date1))) / 1000) / 60);
@@ -185,10 +168,9 @@
 
                     map.getSource('point').setData(along);
                     requestAnimationFrame(animate);
-                    counter = counter + 1;
                 }
 
-                animate(counter)
+                animate()
             });
 
 
