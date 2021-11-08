@@ -54,12 +54,39 @@
     </div> -->
 
     <script>
+        //URL example 
+        //test1.html?kilometerPerMinute=0.2236&center=[4.369115786207061,52.06160542770829]&zoom=14&origin=[4.369115786207061,52.06160542770829]&dest=[6.132421450269675,51.39303171426383]&startdate=Nov%208,%202021%2020:37
         //const kilometerPerMinute = 1.2236;
-        const kilometerPerMinute = 0.2236;
-        var date1 = "Nov 4, 2021 20:37";
+        let kilometerPerMinute = 0.2236;
+        let date1 = "Nov 4, 2021 20:37";
 
         function getParam(param) {
             return new URLSearchParams(window.location.search).get(param);
+        }
+
+        if (getParam('kilometerPerMinute')) {
+            kilometerPerMinute = JSON.parse(getParam('kilometerPerMinute'));
+            console.log('kilometerPerMinute',kilometerPerMinute);
+        }
+
+        if (getParam('dest')) {
+            destination = JSON.parse(getParam('dest'));
+        }
+
+        if (getParam('origin')) {
+            origin = JSON.parse(getParam('origin'));
+        }
+
+        if (getParam('center')) {
+            center = JSON.parse(getParam('center'));
+        }
+
+        if (getParam('zoom')) {
+            zoom = JSON.parse(getParam('zoom'));
+        }
+
+        if (getParam('startdate')) {
+            date1 = getParam('startdate');
         }
 
         (async () => {
@@ -73,20 +100,11 @@
             // Add zoom and rotation controls to the map.
             map.addControl(new mapboxgl.NavigationControl());
 
+            map.setCenter(center)
+            map.setZoom(zoom)
+
             let origin = [4.369115786207061, 52.06160542770829];
             let destination = [6.132421450269675, 51.39303171426383];
-
-            if (getParam('dest')) {
-                destination = JSON.parse(getParam('dest'));
-            }
-            if (getParam('origin')) {
-                origin = JSON.parse(getParam('origin'));
-                map.setCenter(origin)
-            }
-            if (getParam('startdate')) {
-                date1 = getParam('startdate');
-                console.log('date1', date1);
-            }
 
             const route = await getRoute(origin, destination);
 
