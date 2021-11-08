@@ -59,6 +59,8 @@
         //const kilometerPerMinute = 1.2236;
         let kilometerPerMinute = 0.2236;
         let date1 = "Nov 4, 2021 20:37";
+        let origin = [4.369115786207061, 52.06160542770829];
+        let destination = [6.132421450269675, 51.39303171426383];
 
         function getParam(param) {
             return new URLSearchParams(window.location.search).get(param);
@@ -66,7 +68,7 @@
 
         if (getParam('kilometerPerMinute')) {
             kilometerPerMinute = JSON.parse(getParam('kilometerPerMinute'));
-            console.log('kilometerPerMinute',kilometerPerMinute);
+            console.log('kilometerPerMinute', kilometerPerMinute);
         }
 
         if (getParam('dest')) {
@@ -103,10 +105,12 @@
             map.setCenter(center)
             map.setZoom(zoom)
 
-            let origin = [4.369115786207061, 52.06160542770829];
-            let destination = [6.132421450269675, 51.39303171426383];
+
 
             const route = await getRoute(origin, destination);
+
+            createPin(origin, 'a.png')
+            createPin(destination, 'b.png')
 
             // A single point that animates along the route.
             // Coordinates are initially set to origin.
@@ -185,7 +189,18 @@
             });
 
 
+            function createPin(coord, img) {
+                var el = document.createElement('div');
+                el.className = 'marker';
+                el.style.backgroundImage = `url(${img})`;
+                el.style.width = '128px';
+                el.style.height = '128px';
 
+
+                new mapboxgl.Marker(el, { offset: [0, -64] })
+                    .setLngLat(coord)
+                    .addTo(map);
+            }
 
             // getRoute([4.369115786207061, 52.06160542770829], [6.132421450269675, 51.39303171426383]);
             async function getRoute(start, end) {
